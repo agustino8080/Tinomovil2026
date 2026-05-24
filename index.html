@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#00ffcc">
-    <title>TINO TV MASTER PRO v11.5 - Precision Edition</title>
+    <title>TINO TV MASTER PRO v11.6 - Precision Hybrid</title>
 
     <style>
         :root { --neon: #00ffcc; --bg: #000; --card: #121216; }
@@ -26,27 +26,33 @@
         header { padding: 12px 20px; background: #000; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; }
         .logo { font-size: 18px; font-weight: 900; color: var(--neon); text-transform: uppercase; }
 
-        /* REPRODUCTOR MASTER (EL MARCO) */
+        .nav-controls { display: flex; gap: 8px; }
+        .tv-select { background: #111; color: #fff; border: 1px solid #333; padding: 10px; border-radius: 6px; font-size: 10px; font-weight: bold; outline: none; cursor: pointer; }
+
+        /* REPRODUCTOR MASTER */
         .player-wrapper {
-            width: 100%;
-            aspect-ratio: 16/11; /* Altura calculada para Video + Botones de Opciones */
-            position: relative;
-            background: #000;
-            overflow: hidden;
-            border-bottom: 2px solid var(--neon);
+            width: 100%; aspect-ratio: 16/9; position: relative;
+            background: #000; overflow: hidden; border-bottom: 2px solid var(--neon);
             flex-shrink: 0;
         }
 
-        /* REPRODUCTOR (EL LIENZO CON RECORTE) */
+        /* REPRODUCTOR BASE */
         .player-inner {
             position: absolute;
             top: 0; left: 0;
-            width: 160%;  /* Esconde el chat de la derecha */
-            height: 200%; /* Esconde el logo arriba y basura abajo */
-            transform: translate(-10%, -38%); /* Centra el video y botones */
+            width: 100%;
+            height: 100%;
             z-index: 1;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease-in-out;
         }
+
+        /* MODO AISLAMIENTO (Ajustado para ver más arriba y menos abajo) */
+        .player-inner.isolation-mode {
+            width: 125%;
+            height: 145%;
+            transform: translate(-6%, -5%); /* Bajamos el contenido para mostrar el tope y ocultar el fondo */
+        }
+
         iframe { width: 100%; height: 100%; border: none; background: #000; }
 
         /* MASCARA SUPERIOR (RSS) */
@@ -57,9 +63,9 @@
         .tv-trigger { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; display: none; flex-direction: column; justify-content: center; align-items: center; }
         .btn-play { background: var(--neon); color: #000; border: none; padding: 20px 50px; border-radius: 12px; font-weight: 900; font-size: 22px; cursor: pointer; box-shadow: 0 0 40px rgba(0,255,204,0.4); }
 
-        footer { padding: 25px; text-align: center; color: #333; font-size: 11px; font-weight: bold; border-top: 1px solid #111; margin-top: auto; }
+        footer { padding: 20px; text-align: center; color: #333; font-size: 11px; font-weight: bold; border-top: 1px solid #111; margin-top: auto; }
 
-        @media (max-width: 900px) { .side-banner { display: none; } .layout-container { grid-template-columns: 100%; } .player-inner { width: 100%; height: 100%; transform: none; } }
+        @media (max-width: 900px) { .side-banner { display: none; } .layout-container { grid-template-columns: 100%; } }
     </style>
 </head>
 <body>
@@ -70,7 +76,7 @@
     <div class="app-shell" id="app-viewport">
         <header>
             <div class="logo">TINO TV MASTER</div>
-            <div style="display:flex; gap:8px;">
+            <div class="nav-controls">
                 <select class="tv-select" id="sel-deportes" onchange="quickPlay(this.value)"><option value="">⚽ DEPORTES</option></select>
                 <select class="tv-select" id="sel-tv" onchange="quickPlay(this.value)"><option value="">📺 TV ABIERTA</option></select>
                 <select class="tv-select" id="sel-cine" onchange="quickPlay(this.value)"><option value="">🎬 CINE</option></select>
@@ -84,7 +90,7 @@
                 <button class="btn-play" id="btn-focus" onclick="startChannel()">▶ CONECTAR SEÑAL</button>
             </div>
 
-            <div class="player-inner">
+            <div class="player-inner" id="zoom-engine">
                 <iframe id="tv-frame" src="" allowfullscreen allow="autoplay"></iframe>
             </div>
         </div>
@@ -129,7 +135,20 @@
     function quickPlay(val) {
         if(!val) return;
         const [source, id] = val.split('|');
-        currentUrl = (source === "cablevision") ? `https://www.cablevisionhd.com/${id}-en-vivo.php` : `https://streamx550.com/global1.php?channel=${id}`;
+        const engine = document.getElementById('zoom-engine');
+
+        // LÓGICA DE URL SEGÚN FUENTE
+        if (source === "cablevision") {
+            currentUrl = `https://www.cablevisionhd.com/${id}-en-vivo.php`;
+            engine.classList.add('isolation-mode'); // Aplicar recorte solo aquí
+        } else if (source === "ksd") {
+            currentUrl = `https://embed.ksdjugfsddeports.com/embed/${id}.html`;
+            engine.classList.remove('isolation-mode'); // No necesita recorte
+        } else {
+            currentUrl = `https://streamx550.com/global1.php?channel=${id}`;
+            engine.classList.remove('isolation-mode');
+        }
+
         document.getElementById('tv-frame').src = "";
         document.getElementById('tv-shield').style.display = 'flex';
         document.getElementById('btn-focus').focus();
