@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
-    <title>TINO TV MASTER - Versión Móvil v1.0</title>
+    <title>TINO TV MASTER - Versión Móvil v1.2</title>
 
     <style>
         :root { --neon: #00ffcc; --bg: #000; --card: #121216; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body { background: #000; color: #fff; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 
@@ -33,14 +33,14 @@
         /* REPRODUCTOR MÓVIL */
         .player-wrapper {
             width: 100%;
-            aspect-ratio: 16/11.5; /* Altura para ver video y opciones */
+            aspect-ratio: 16/11.5;
             position: relative;
             background: #000;
             overflow: hidden;
             border-bottom: 2px solid var(--neon);
         }
 
-        /* RSS DE NOTICIAS LENTO (70s) - TAPA LOGO ORIGINAL */
+        /* RSS DE NOTICIAS LENTO (70s) */
         .mask-top {
             position: absolute; top: 0; left: 0; width: 100%; height: 35px;
             background: rgba(0,0,0,0.9); z-index: 150; display: flex; align-items: center;
@@ -52,7 +52,7 @@
         }
         @keyframes ticker-move { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-        /* LÓGICA DE AISLAMIENTO PARA CABLEVISION EN MÓVIL */
+        /* LÓGICA DE AISLAMIENTO PARA CABLEVISION */
         .player-inner {
             position: absolute;
             top: 0; left: 0;
@@ -61,17 +61,15 @@
             z-index: 1;
         }
 
-        /* RECORTE PARA CABLEVISION: RECORTE INFERIOR FUERTE */
         .player-inner.isolation-mode {
             width: 140%;
-            height: 260%; /* Aumento masivo para enterrar la parte inferior */
-            top: -15%;    /* Bajamos el contenido para ver mejor la parte superior */
-            left: -20%;   /* Ajuste lateral centrado */
+            height: 260%;
+            top: -15%;
+            left: -20%;
         }
 
         iframe { width: 100%; height: 100%; border: none; background: #000; }
 
-        /* ESCUDO DE SEÑAL SEGURA */
         .tv-trigger {
             position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 500;
             display: none; flex-direction: column; justify-content: center; align-items: center;
@@ -83,16 +81,32 @@
             box-shadow: 0 0 25px var(--neon);
         }
 
-        /* PUBLICIDAD INFERIOR */
+        /* PUBLICIDAD INFERIOR AMPLIADA */
         .bottom-banner {
-            width: 100%; height: 50px; background: #000; border-top: 1px solid #111;
+            width: 100%; height: 120px; background: #000; border-top: 1px solid #111;
             overflow: hidden; display: flex; align-items: center;
         }
         .bottom-scroll { display: flex; animation: scroll-x 30s linear infinite; }
-        .bottom-scroll img { height: 40px; margin: 0 10px; border-radius: 4px; border: 1px solid #222; }
+        .bottom-scroll img { height: 100px; margin: 0 10px; border-radius: 8px; border: 2px solid #222; cursor: pointer; transition: transform 0.2s; }
+        .bottom-scroll img:active { transform: scale(0.9); }
         @keyframes scroll-x { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        footer { padding: 30px; text-align: center; color: #333; font-size: 9px; font-weight: bold; letter-spacing: 1px; }
+        /* MODAL DE IMAGEN AMPLIADA */
+        #ad-modal {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            z-index: 5000; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        #modal-img { max-width: 90%; max-height: 60vh; border-radius: 12px; border: 2px solid var(--neon); box-shadow: 0 0 30px var(--neon); }
+        .modal-info { margin-top: 20px; text-align: center; }
+        .btn-more {
+            background: var(--neon); color: #000; border: none;
+            padding: 12px 30px; border-radius: 8px; font-weight: 900; margin-top: 15px;
+            cursor: pointer; text-decoration: none; display: inline-block;
+        }
+        .btn-close { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 30px; cursor: pointer; }
+
+        footer { padding: 20px; text-align: center; color: #333; font-size: 9px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -108,21 +122,12 @@
 
     <div class="player-wrapper">
         <div class="mask-top"><div class="ticker" id="live-ticker">CONECTANDO CON EL FEED DE NOTICIAS DEPORTIVAS...</div></div>
-
         <div id="tv-shield" class="tv-trigger">
             <div style="font-size: 40px; margin-bottom: 10px;">🛡️</div>
             <button class="btn-play" onclick="startChannel()">INICIAR SEÑAL SEGURA</button>
-            <p style="font-size: 10px; color: #555; margin-top: 15px; font-weight: bold;">ANTI-POPUPS & MALWARE BLOCKED</p>
         </div>
-
         <div class="player-inner" id="zoom-engine">
-            <!-- IFRAME BLINDADO -->
-            <iframe id="tv-frame" src=""
-                    allowfullscreen
-                    allow="autoplay; encrypted-media"
-                    sandbox="allow-scripts allow-same-origin allow-forms"
-                    referrerpolicy="no-referrer">
-            </iframe>
+            <iframe id="tv-frame" src="" allowfullscreen allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
         </div>
     </div>
 
@@ -130,7 +135,18 @@
         <div class="bottom-scroll" id="ads-strip"></div>
     </div>
 
-    <footer>© 2026 - AGUSTÍN PIZARRO. TODOS LOS DERECHOS RESERVADOS.</footer>
+    <!-- MODAL DE PUBLICIDAD -->
+    <div id="ad-modal">
+        <span class="btn-close" onclick="closeModal()">&times;</span>
+        <img id="modal-img" src="">
+        <div class="modal-info">
+            <h3 style="color:var(--neon)">PRODUCTO EXCLUSIVO 2026</h3>
+            <p style="font-size:12px; color:#aaa; margin-top:5px;">Descubre la nueva colección y ofertas especiales.</p>
+            <a href="https://sportivo.whacka.app/" target="_blank" class="btn-more">VER MÁS INFORMACIÓN</a>
+        </div>
+    </div>
+
+    <footer>© 2026 - AGUSTÍN PIZARRO.</footer>
 
 <script src="tino_tv_data.js"></script>
 <script>
@@ -140,9 +156,19 @@
         const strip = document.getElementById('ads-strip');
         let html = "";
         for(let i=1; i<=17; i++) {
-            html += `<img src="images/banner${i}.png" onerror="this.src='im%C3%A1genes/banner${i}.png'">`;
+            const src = `images/banner${i}.png`;
+            html += `<img src="${src}" onclick="openModal('${src}')" onerror="this.src='im%C3%A1genes/banner${i}.png'; this.onclick=function(){openModal('im%C3%A1genes/banner${i}.png')}">`;
         }
         strip.innerHTML = html + html;
+    }
+
+    function openModal(src) {
+        document.getElementById('modal-img').src = src;
+        document.getElementById('ad-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('ad-modal').style.display = 'none';
     }
 
     async function updateNews() {
@@ -171,7 +197,6 @@
         if(!val) return;
         const [source, id] = val.split('|');
         const engine = document.getElementById('zoom-engine');
-
         if (source === "cablevision") {
             currentUrl = `https://www.cablevisionhd.com/${id}-en-vivo.php`;
             engine.classList.add('isolation-mode');
@@ -179,22 +204,16 @@
             currentUrl = source === "ksd" ? `https://embed.ksdjugfsddeports.com/embed/${id}.html` : `https://streamx550.com/global1.php?channel=${id}`;
             engine.classList.remove('isolation-mode');
         }
-
         document.getElementById('tv-frame').src = "";
         document.getElementById('tv-shield').style.display = 'flex';
     }
 
     function startChannel() {
-        if(currentUrl) {
-            document.getElementById('tv-frame').src = currentUrl;
-            document.getElementById('tv-shield').style.display = 'none';
-        }
+        if(currentUrl) { document.getElementById('tv-frame').src = currentUrl; document.getElementById('tv-shield').style.display = 'none'; }
     }
 
     window.onload = () => {
-        setupAds();
-        populateSelects(KSD_CHANNELS);
-        updateNews();
+        setupAds(); populateSelects(KSD_CHANNELS); updateNews();
         setInterval(updateNews, 900000);
     };
 </script>
