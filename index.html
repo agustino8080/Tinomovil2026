@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
-    <title>TINO TV MASTER - Versión Móvil v1.2</title>
+    <title>TINO TV MASTER - Mobile Video Fix v1.4</title>
 
     <style>
         :root { --neon: #00ffcc; --bg: #000; --card: #121216; }
@@ -13,100 +13,74 @@
 
         body { background: #000; color: #fff; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 
-        /* CABECERA MÓVIL OPTIMIZADA */
         header {
-            padding: 12px; background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(10px); border-bottom: 1px solid #1a1a1a;
+            padding: 12px; background: #000; border-bottom: 1px solid #1a1a1a;
             position: sticky; top: 0; z-index: 2000;
             display: flex; flex-direction: column; gap: 10px;
         }
-        .logo { font-size: 16px; font-weight: 900; color: var(--neon); text-transform: uppercase; text-align: center; letter-spacing: 1px; }
+        .logo { font-size: 16px; font-weight: 900; color: var(--neon); text-transform: uppercase; text-align: center; }
 
-        /* SELECTORES TÁCTILES */
         .nav-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; width: 100%; }
         .tv-select {
             background: #111; color: #fff; border: 1px solid #333;
-            padding: 10px 2px; border-radius: 6px; font-size: 8px; font-weight: 900;
+            padding: 10px 2px; border-radius: 6px; font-size: 9px; font-weight: 900;
             outline: none; cursor: pointer; text-align: center;
         }
 
-        /* REPRODUCTOR MÓVIL */
+        /* REPRODUCTOR */
         .player-wrapper {
-            width: 100%;
-            aspect-ratio: 16/11.5;
-            position: relative;
-            background: #000;
-            overflow: hidden;
-            border-bottom: 2px solid var(--neon);
+            width: 100%; aspect-ratio: 16/11.5; position: relative;
+            background: #000; overflow: hidden; border-bottom: 2px solid var(--neon);
         }
 
-        /* RSS DE NOTICIAS LENTO (70s) */
         .mask-top {
             position: absolute; top: 0; left: 0; width: 100%; height: 35px;
             background: rgba(0,0,0,0.9); z-index: 150; display: flex; align-items: center;
             border-bottom: 1px solid var(--neon); overflow: hidden;
         }
-        .ticker {
-            white-space: nowrap; font-size: 11px; font-weight: 900; color: var(--neon);
-            display: inline-block; animation: ticker-move 70s linear infinite;
-        }
+        .ticker { white-space: nowrap; font-size: 11px; font-weight: 900; color: var(--neon); display: inline-block; animation: ticker-move 70s linear infinite; }
         @keyframes ticker-move { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-        /* LÓGICA DE AISLAMIENTO PARA CABLEVISION */
-        .player-inner {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            transition: all 0.4s ease-in-out;
-            z-index: 1;
-        }
-
-        .player-inner.isolation-mode {
-            width: 140%;
-            height: 260%;
-            top: -15%;
-            left: -20%;
-        }
-
+        .player-inner { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transition: all 0.4s ease-in-out; z-index: 1; }
+        .player-inner.isolation-mode { width: 140%; height: 260%; top: -15%; left: -20%; }
         iframe { width: 100%; height: 100%; border: none; background: #000; }
 
-        .tv-trigger {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 500;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; padding: 20px;
-        }
-        .btn-play {
-            background: var(--neon); color: #000; border: none;
-            padding: 18px 40px; border-radius: 50px; font-weight: 900; font-size: 16px;
-            box-shadow: 0 0 25px var(--neon);
-        }
+        .tv-trigger { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        .btn-play { background: var(--neon); color: #000; border: none; padding: 18px 40px; border-radius: 50px; font-weight: 900; font-size: 16px; box-shadow: 0 0 25px var(--neon); }
 
-        /* PUBLICIDAD INFERIOR AMPLIADA */
-        .bottom-banner {
-            width: 100%; height: 120px; background: #000; border-top: 1px solid #111;
-            overflow: hidden; display: flex; align-items: center;
-        }
+        /* BANNER DE IMÁGENES */
+        .bottom-banner { width: 100%; height: 90px; background: #000; border-top: 1px solid #111; overflow: hidden; display: flex; align-items: center; }
         .bottom-scroll { display: flex; animation: scroll-x 30s linear infinite; }
-        .bottom-scroll img { height: 100px; margin: 0 10px; border-radius: 8px; border: 2px solid #222; cursor: pointer; transition: transform 0.2s; }
-        .bottom-scroll img:active { transform: scale(0.9); }
+        .bottom-scroll img { height: 70px; margin: 0 10px; border-radius: 8px; border: 1px solid #222; cursor: pointer; }
         @keyframes scroll-x { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* MODAL DE IMAGEN AMPLIADA */
-        #ad-modal {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-            z-index: 5000; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px;
+        /* --- VIDEO BANNER MEJORADO Y CENTRADO --- */
+        .video-ad-section {
+            width: 100%; padding: 20px 0; background: #000;
+            border-top: 1px solid #1a1a1a; overflow-x: auto;
+            display: flex; gap: 15px; padding-left: 5vw; padding-right: 5vw;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
         }
-        #modal-img { max-width: 90%; max-height: 60vh; border-radius: 12px; border: 2px solid var(--neon); box-shadow: 0 0 30px var(--neon); }
-        .modal-info { margin-top: 20px; text-align: center; }
-        .btn-more {
-            background: var(--neon); color: #000; border: none;
-            padding: 12px 30px; border-radius: 8px; font-weight: 900; margin-top: 15px;
-            cursor: pointer; text-decoration: none; display: inline-block;
+        .video-ad-section::-webkit-scrollbar { display: none; }
+
+        .video-ad-card {
+            width: 90vw; /* Ocupa casi todo el ancho para ser impactante */
+            aspect-ratio: 16/9; /* Proporción HD */
+            background: #000; border-radius: 12px;
+            overflow: hidden; border: 2px solid var(--neon); position: relative;
+            scroll-snap-align: center; flex-shrink: 0;
+            cursor: pointer;
         }
+        .video-ad-card video { width: 100%; height: 100%; object-fit: contain; } /* 'contain' asegura video completo */
+        .video-tag { position: absolute; top: 12px; left: 12px; background: var(--neon); color: #000; padding: 4px 10px; font-size: 10px; font-weight: 900; border-radius: 5px; z-index: 10; border: 1px solid #000; }
+
+        /* MODAL */
+        #ad-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #modal-img { max-width: 90%; max-height: 60vh; border-radius: 12px; border: 2px solid var(--neon); }
         .btn-close { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 30px; cursor: pointer; }
 
-        footer { padding: 20px; text-align: center; color: #333; font-size: 9px; font-weight: bold; }
+        footer { padding: 20px; text-align: center; color: #333; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -115,16 +89,15 @@
         <div class="logo">TINO TV MASTER</div>
         <div class="nav-controls">
             <select class="tv-select" id="sel-deportes" onchange="quickPlay(this.value)"><option value="">⚽ DEPORTES</option></select>
-            <select class="tv-select" id="sel-tv" onchange="quickPlay(this.value)"><option value="">📺 TV</option></select>
+            <select class="tv-select" id="sel-tv" onchange="quickPlay(this.value)"><option value="">📺 TV ABIERTA</option></select>
             <select class="tv-select" id="sel-cine" onchange="quickPlay(this.value)"><option value="">🎬 CINE</option></select>
         </div>
     </header>
 
     <div class="player-wrapper">
-        <div class="mask-top"><div class="ticker" id="live-ticker">CONECTANDO CON EL FEED DE NOTICIAS DEPORTIVAS...</div></div>
+        <div class="mask-top"><div class="ticker" id="live-ticker">CONECTANDO NOTICIAS EN VIVO...</div></div>
         <div id="tv-shield" class="tv-trigger">
-            <div style="font-size: 40px; margin-bottom: 10px;">🛡️</div>
-            <button class="btn-play" onclick="startChannel()">INICIAR SEÑAL SEGURA</button>
+            <button class="btn-play" onclick="startChannel()">▶ INICIAR SEÑAL</button>
         </div>
         <div class="player-inner" id="zoom-engine">
             <iframe id="tv-frame" src="" allowfullscreen allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
@@ -135,14 +108,23 @@
         <div class="bottom-scroll" id="ads-strip"></div>
     </div>
 
-    <!-- MODAL DE PUBLICIDAD -->
+    <!-- BANNER VIDEOS CENTRADOS Y COMPLETOS -->
+    <div class="video-ad-section">
+        <div class="video-ad-card" onclick="window.open('https://sportivo.whacka.app/', '_blank')">
+            <div class="video-tag">COLECCIÓN ADIDAS 2026</div>
+            <video autoplay muted loop playsinline><source src="images/video1.mp4"></video>
+        </div>
+        <div class="video-ad-card" onclick="window.open('https://sportivo.whacka.app/', '_blank')">
+            <div class="video-tag">EXCLUSIVO PUMA FERRARI</div>
+            <video autoplay muted loop playsinline><source src="images/video2.mp4"></video>
+        </div>
+    </div>
+
     <div id="ad-modal">
         <span class="btn-close" onclick="closeModal()">&times;</span>
         <img id="modal-img" src="">
-        <div class="modal-info">
-            <h3 style="color:var(--neon)">PRODUCTO EXCLUSIVO 2026</h3>
-            <p style="font-size:12px; color:#aaa; margin-top:5px;">Descubre la nueva colección y ofertas especiales.</p>
-            <a href="https://sportivo.whacka.app/" target="_blank" class="btn-more">VER MÁS INFORMACIÓN</a>
+        <div style="margin-top:20px; text-align:center;">
+            <a href="https://sportivo.whacka.app/" target="_blank" style="background:var(--neon); color:#000; padding:12px 25px; border-radius:8px; font-weight:900; text-decoration:none;">IR A LA TIENDA</a>
         </div>
     </div>
 
@@ -162,23 +144,15 @@
         strip.innerHTML = html + html;
     }
 
-    function openModal(src) {
-        document.getElementById('modal-img').src = src;
-        document.getElementById('ad-modal').style.display = 'flex';
-    }
-
-    function closeModal() {
-        document.getElementById('ad-modal').style.display = 'none';
-    }
+    function openModal(src) { document.getElementById('modal-img').src = src; document.getElementById('ad-modal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('ad-modal').style.display = 'none'; }
 
     async function updateNews() {
         try {
             const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent("https://www.marca.com/rss/futbol.xml")}`);
             const data = await res.json();
-            if (data.status === 'ok') {
-                document.getElementById('live-ticker').innerText = data.items.map(item => `⚽ ${item.title.toUpperCase()}`).join(" --- ") + " --- BIENVENIDO A TINO TV MASTER --- ";
-            }
-        } catch (e) { document.getElementById('live-ticker').innerText = "⚽ BIENVENIDO A TINO TV MASTER MOBILE --- "; }
+            if (data.status === 'ok') document.getElementById('live-ticker').innerText = data.items.map(item => `⚽ ${item.title.toUpperCase()}`).join(" --- ");
+        } catch (e) { }
     }
 
     function populateSelects(db) {
@@ -197,25 +171,16 @@
         if(!val) return;
         const [source, id] = val.split('|');
         const engine = document.getElementById('zoom-engine');
-        if (source === "cablevision") {
-            currentUrl = `https://www.cablevisionhd.com/${id}-en-vivo.php`;
-            engine.classList.add('isolation-mode');
-        } else {
-            currentUrl = source === "ksd" ? `https://embed.ksdjugfsddeports.com/embed/${id}.html` : `https://streamx550.com/global1.php?channel=${id}`;
-            engine.classList.remove('isolation-mode');
-        }
+        currentUrl = (source === "cablevision") ? `https://www.cablevisionhd.com/${id}-en-vivo.php` : `https://streamx550.com/global1.php?channel=${id}`;
+        if(source === "cablevision") engine.classList.add('isolation-mode');
+        else engine.classList.remove('isolation-mode');
         document.getElementById('tv-frame').src = "";
         document.getElementById('tv-shield').style.display = 'flex';
     }
 
-    function startChannel() {
-        if(currentUrl) { document.getElementById('tv-frame').src = currentUrl; document.getElementById('tv-shield').style.display = 'none'; }
-    }
+    function startChannel() { if(currentUrl) { document.getElementById('tv-frame').src = currentUrl; document.getElementById('tv-shield').style.display = 'none'; } }
 
-    window.onload = () => {
-        setupAds(); populateSelects(KSD_CHANNELS); updateNews();
-        setInterval(updateNews, 900000);
-    };
+    window.onload = () => { setupAds(); populateSelects(KSD_CHANNELS); updateNews(); setInterval(updateNews, 900000); };
 </script>
 </body>
 </html>
