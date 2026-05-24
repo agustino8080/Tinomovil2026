@@ -5,83 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
-    <title>TINO TV MASTER - Mobile Secure</title>
+    <title>TINO TV MASTER - Mobile Zoom Fix</title>
 
     <style>
         :root { --neon: #00ffcc; --bg: #000; --card: #121216; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #000; color: #fff; overflow-x: hidden; }
 
-        body { background: #000; color: #fff; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        header { padding: 12px; background: #000; border-bottom: 1px solid #1a1a1a; display: flex; flex-direction: column; gap: 10px; position: sticky; top: 0; z-index: 2000; }
+        .logo { font-size: 15px; font-weight: 900; color: var(--neon); text-transform: uppercase; text-align: center; }
+        .nav-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .tv-select { background: #111; color: #fff; border: 1px solid #333; padding: 10px 2px; border-radius: 6px; font-size: 8px; font-weight: 900; outline: none; }
 
-        /* CABECERA MÓVIL */
-        header {
-            padding: 15px; background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(10px); border-bottom: 1px solid #1a1a1a;
-            position: sticky; top: 0; z-index: 2000;
-            display: flex; flex-direction: column; gap: 12px;
-        }
-        .logo { font-size: 16px; font-weight: 900; color: var(--neon); text-transform: uppercase; text-align: center; }
+        /* REPRODUCTOR */
+        .player-wrapper { width: 100%; aspect-ratio: 16/9; position: relative; background: #000; overflow: hidden; border-bottom: 2px solid var(--neon); }
 
-        /* SELECTORES TÁCTILES GRANDES */
-        .nav-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; }
-        .tv-select {
-            background: #111; color: #fff; border: 1px solid #333;
-            padding: 12px 5px; border-radius: 8px; font-size: 9px; font-weight: 900;
-            outline: none; cursor: pointer; text-align: center;
+        /* --- CONTROL DE ZOOM (MODIFICA AQUÍ) --- */
+        .player-inner {
+            position: absolute;
+            top: 0; left: 0;
+            width: 125%;  /* Ajusta el Zoom horizontal al 125% */
+            height: 125%; /* Ajusta el Zoom vertical al 125% */
+            transform: translate(-10%, -10%); /* Centra el video ampliado */
+            z-index: 1;
         }
+        iframe { width: 100%; height: 100%; border: none; background: #000; }
 
-        /* REPRODUCTOR MÓVIL */
-        .player-wrapper {
-            width: 100%; aspect-ratio: 16/9; position: relative;
-            background: #000; overflow: hidden; border-bottom: 2px solid var(--neon);
-        }
-
-        /* RSS DE NOTICIAS LENTO (70s) */
-        .mask-top {
-            position: absolute; top: 0; left: 0; width: 100%; height: 35px;
-            background: rgba(0,0,0,0.85); z-index: 150; display: flex; align-items: center;
-            border-bottom: 1px solid var(--neon); overflow: hidden;
-        }
-        .ticker {
-            white-space: nowrap; font-size: 12px; font-weight: 900; color: var(--neon);
-            display: inline-block; animation: ticker-move 70s linear infinite;
-        }
+        /* MASCARAS TAPA BASURA (Siempre arriba del video) */
+        .mask-top { position: absolute; top: 0; left: 0; width: 100%; height: 35px; background: rgba(0,0,0,0.85); z-index: 150; display: flex; align-items: center; border-bottom: 1px solid var(--neon); overflow: hidden; }
+        .ticker { white-space: nowrap; font-size: 11px; font-weight: 900; color: var(--neon); display: inline-block; animation: ticker-move 70s linear infinite; }
         @keyframes ticker-move { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-        /* COBERTURA DE CHAT Y REDES EN MÓVIL */
-        .mask-right { position: absolute; top: 35px; right: 0; width: 30%; height: calc(100% - 70px); background: #000; z-index: 100; border-left: 1px solid #222; }
+        .mask-right-video { position: absolute; top: 35px; right: 0; width: 40%; height: calc(100% - 70px); background: #000; z-index: 100; border-left: 1px solid #222; overflow: hidden; }
+        .mask-right-video video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 1s; }
+        .mask-right-video video.active { opacity: 1; }
+
         .mask-bottom { position: absolute; bottom: 0; left: 0; width: 100%; height: 35px; background: #000; z-index: 100; border-top: 1px solid var(--neon); overflow: hidden; }
         .bottom-scroll { display: flex; animation: scroll-x 25s linear infinite; height: 100%; }
         .bottom-scroll img { height: 100%; padding: 4px; }
         @keyframes scroll-x { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* IFRAME CON BLOQUEO TOTAL (SANDBOX REFORZADO) */
-        iframe { width: 100%; height: 100%; border: none; background: #000; }
+        .tv-trigger { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        .btn-play { background: var(--neon); color: #000; border: none; padding: 15px 35px; border-radius: 50px; font-weight: 900; font-size: 14px; box-shadow: 0 0 20px var(--neon); }
 
-        /* ESCUDO DE SEÑAL SEGURA */
-        .tv-trigger {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 500;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; padding: 20px;
-        }
-        .btn-play {
-            background: var(--neon); color: #000; border: none;
-            padding: 18px 40px; border-radius: 50px; font-weight: 900; font-size: 16px;
-            box-shadow: 0 0 25px var(--neon);
-        }
-        .shield-info { font-size: 10px; color: #555; margin-top: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .mobile-ads { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+        .ad-card { width: 100%; background: var(--card); border-radius: 10px; border: 1px solid #222; display: flex; align-items: center; gap: 12px; padding: 10px; }
+        .ad-card img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--neon); }
 
-        /* PUBLICIDAD DE TARJETAS (SOLO PNG) */
-        .mobile-ads { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .ad-card {
-            width: 100%; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #222;
-            display: flex; align-items: center; gap: 15px; padding: 12px;
-        }
-        .ad-card img { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid var(--neon); }
-        .ad-card h4 { font-size: 13px; color: var(--neon); text-transform: uppercase; }
-        .ad-card p { font-size: 10px; color: #666; margin-top: 3px; }
-
-        footer { padding: 30px; text-align: center; color: #222; font-size: 9px; font-weight: 900; letter-spacing: 2px; }
+        footer { padding: 25px; text-align: center; color: #222; font-size: 9px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -90,36 +61,34 @@
         <div class="logo">TINO TV MASTER</div>
         <div class="nav-controls">
             <select class="tv-select" id="sel-deportes" onchange="quickPlay(this.value)"><option value="">⚽ DEPORTES</option></select>
-            <select class="tv-select" id="sel-tv" onchange="quickPlay(this.value)"><option value="">📺 TV ABIERTA</option></select>
+            <select class="tv-select" id="sel-tv" onchange="quickPlay(this.value)"><option value="">📺 TV</option></select>
             <select class="tv-select" id="sel-cine" onchange="quickPlay(this.value)"><option value="">🎬 CINE</option></select>
         </div>
     </header>
 
     <div class="player-wrapper">
-        <div class="mask-top"><div class="ticker" id="live-ticker">CONECTANDO CON EL FEED DE NOTICIAS...</div></div>
+        <div class="mask-top"><div class="ticker" id="live-ticker">CONECTANDO NOTICIAS...</div></div>
 
-        <!-- MASCARAS TAPA BASURA -->
-        <div class="mask-right"></div>
+        <div class="mask-right-video">
+            <video id="v1" autoplay muted loop playsinline class="active"><source src="images/video1.mp4"></video>
+            <video id="v2" muted loop playsinline><source src="images/video2.mp4"></video>
+        </div>
+
         <div class="mask-bottom"><div class="bottom-scroll" id="bottom-ads"></div></div>
 
         <div id="tv-shield" class="tv-trigger">
-            <div style="font-size: 40px; margin-bottom: 10px;">🛡️</div>
-            <button class="btn-play" onclick="startChannel()">INICIAR SEÑAL SEGURA</button>
-            <div class="shield-info">Popups & Malware Blocked</div>
+            <button class="btn-play" onclick="startChannel()">▶ INICIAR SEÑAL SEGURA</button>
         </div>
 
-        <!-- IFRAME BLINDADO CONTRA DESCARGAS Y POPUPS -->
-        <iframe id="tv-frame" src=""
-                allowfullscreen
-                allow="autoplay; encrypted-media"
-                sandbox="allow-scripts allow-same-origin allow-forms"
-                referrerpolicy="no-referrer">
-        </iframe>
+        <!-- REPRODUCTOR CON ZOOM -->
+        <div class="player-inner">
+            <iframe id="tv-frame" src="" allowfullscreen allow="autoplay" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+        </div>
     </div>
 
     <div class="mobile-ads" id="ads-list"></div>
 
-    <footer>© 2026 - AGUSTÍN PIZARRO. TODOS LOS DERECHOS RESERVADOS.</footer>
+    <footer>© 2026 - AGUSTÍN PIZARRO.</footer>
 
 <script src="tino_tv_data.js"></script>
 <script>
@@ -128,24 +97,21 @@
     function setupAds() {
         const list = document.getElementById('ads-list'), btm = document.getElementById('bottom-ads');
         let lHtml = "", bHtml = "";
-
-        // Carga de los 17 banners en formato PNG
         for(let i=1; i<=17; i++) {
             const path = `images/banner${i}.png`;
-            if(i <= 6) { // Solo mostramos 6 tarjetas abajo para no saturar el movil
-                lHtml += `
-                    <div class="ad-card" onclick="window.open('https://sportivo.whacka.app/', '_blank')">
-                        <img src="${path}">
-                        <div>
-                            <h4>OFERTA LIMITADA</h4>
-                            <p>Colección exclusiva 2026. Envíos a todo el país.</p>
-                        </div>
-                    </div>`;
+            if(i <= 5) {
+                lHtml += `<div class="ad-card" onclick="window.open('https://sportivo.whacka.app/', '_blank')"><img src="${path}"><div><h4 style="font-size:12px;color:var(--neon)">OFERTA 2026</h4><p style="font-size:10px;color:#666">Envío gratis en toda la línea.</p></div></div>`;
             }
             bHtml += `<img src="${path}">`;
         }
         list.innerHTML = lHtml;
         btm.innerHTML = bHtml + bHtml;
+    }
+
+    function switchVideo() {
+        const v1 = document.getElementById('v1'), v2 = document.getElementById('v2');
+        if(v1.classList.contains('active')) { v1.classList.remove('active'); v2.classList.add('active'); v2.play(); }
+        else { v2.classList.remove('active'); v1.classList.add('active'); v1.play(); }
     }
 
     async function updateNews() {
@@ -155,7 +121,7 @@
             if (data.status === 'ok') {
                 document.getElementById('live-ticker').innerText = data.items.map(item => `⚽ ${item.title.toUpperCase()}`).join(" --- ");
             }
-        } catch (e) { document.getElementById('live-ticker').innerText = "⚽ BIENVENIDO A TINO TV MASTER MOBILE --- "; }
+        } catch (e) { document.getElementById('live-ticker').innerText = "⚽ BIENVENIDO A TINO TV MOBILE --- "; }
     }
 
     function populateSelects(db) {
@@ -179,17 +145,13 @@
     }
 
     function startChannel() {
-        if(currentUrl) {
-            document.getElementById('tv-frame').src = currentUrl;
-            document.getElementById('tv-shield').style.display = 'none';
-        }
+        if(currentUrl) { document.getElementById('tv-frame').src = currentUrl; document.getElementById('tv-shield').style.display = 'none'; }
     }
 
     window.onload = () => {
-        setupAds();
-        populateSelects(KSD_CHANNELS);
-        updateNews();
+        setupAds(); populateSelects(KSD_CHANNELS); updateNews();
         setInterval(updateNews, 900000);
+        setInterval(switchVideo, 12000);
     };
 </script>
 </body>
