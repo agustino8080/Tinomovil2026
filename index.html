@@ -61,12 +61,12 @@
             z-index: 1;
         }
 
-        /* RECORTE PARA CABLEVISION: MAS ARRIBA, MENOS ABAJO */
+        /* RECORTE PARA CABLEVISION: RECORTE INFERIOR FUERTE */
         .player-inner.isolation-mode {
-            width: 130%;
-            height: 195%;
-            top: -28%;    /* Revela más parte superior */
-            left: -15%;
+            width: 140%;
+            height: 260%; /* Aumento masivo para enterrar la parte inferior */
+            top: -15%;    /* Bajamos el contenido para ver mejor la parte superior */
+            left: -20%;   /* Ajuste lateral centrado */
         }
 
         iframe { width: 100%; height: 100%; border: none; background: #000; }
